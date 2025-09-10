@@ -3,6 +3,7 @@ using sportradar.Models;
 using sportradar.Models.Sportradar.Soccer;
 using sportradar.Models.Sportradar.Soccer.SeasonCompetitorsResponse;
 using sportradar.Services.SportradarApiService;
+using System.Configuration;
 
 namespace sportradar.Forms
 {
@@ -14,7 +15,9 @@ namespace sportradar.Forms
         public HistoricalDataForm()
         {
             InitializeComponent();
-            _apiService = new SportradarApiService("5JIL3VdZKbmRfijZPq9tQldl1pWaaL8jPkp2ltOM");
+
+            var apiKey = ConfigurationManager.AppSettings["SportradarApiKey"] ?? string.Empty;
+            _apiService = new SportradarApiService(apiKey);
         }
 
         #region Form Events
@@ -23,6 +26,7 @@ namespace sportradar.Forms
         {
             try
             {
+                //Get all league and bind to dropdown (combobox)
                 var resp = await _apiService.GetCompetitionsAsync()
                            ?? throw new Exception("Unexpected response from server.");
                 _competitions = resp.Competitions
@@ -113,6 +117,7 @@ namespace sportradar.Forms
 
             var competitionId = cbbCompetitions.SelectedValue.ToString();
 
+            //Get all league
             var competitionSeasonsResp = await _apiService.GetCompetitionSeasonsAsync(competitionId!);
 
             if (competitionSeasonsResp == null)
@@ -124,6 +129,7 @@ namespace sportradar.Forms
 
             foreach (var competitionSeason in competitionSeasonsResp.Seasons)
             {
+                //Get all team for a given season
                 var seasonCompetitorsResp = await _apiService.GetSeasonCompetitorsAsync(competitionSeason.Id);
                 if (seasonCompetitorsResp != null)
                 {
@@ -133,16 +139,17 @@ namespace sportradar.Forms
 
             seasonCompetitors = seasonCompetitors.DistinctBy(x => x.Id).ToList();
 
-            //Find team
             var matchCompetitor = seasonCompetitors
                 .FirstOrDefault(x => x.Name.Contains(teamName, StringComparison.OrdinalIgnoreCase));
 
             if (matchCompetitor != null && ShowConfirmDialog(matchCompetitor))
             {
+                //Get all upcoming matches and statistics for the 30 most recent completed matches of a specified Team
                 var competitorSummariesResp = await _apiService.GetCompetitorSummariesAsync(matchCompetitor.Id);
                 if (competitorSummariesResp == null) return;
                 var competitorSummaries = competitorSummariesResp.Summaries;
 
+                // Filter past matches only
                 competitorSummaries = competitorSummaries
                     .Where(x => x.SportEvent.StartTime.Date < DateTime.UtcNow.Date)
                     .ToList();
@@ -151,6 +158,7 @@ namespace sportradar.Forms
                     .Select(x => BuildHistoricalMatch(x))
                     .ToList();
 
+                //Load data to DataGridView
                 BindMatchData(data, dtgv);
             }
             else

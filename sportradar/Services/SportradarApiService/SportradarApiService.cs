@@ -30,9 +30,13 @@ namespace sportradar.Services.SportradarApiService
         }
 
         /// <summary>
-        /// 
+        /// Provides match information for all currently live matches including team scoring, 
+        /// player and team match statistics. 
+        /// This feed updates in real time as matches are played. 
+        /// Matches appear a few minutes before kick-off and disappear a few minutes after the match reaches “ended” status.
+        /// See API docs: Live Summaries - https://developer.sportradar.com/soccer/reference/soccer-live-summaries
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of currently live match</returns>
         public async Task<LiveSummariesResponse?> GetLiveSportEventsAsync()
         {
             string endpoint = $"{_lang}/schedules/live/summaries.json";
@@ -43,11 +47,14 @@ namespace sportradar.Services.SportradarApiService
             return JsonConvert.DeserializeObject<LiveSummariesResponse>(json);
         }
 
+
         /// <summary>
-        /// 
+        /// Provides real-time match-level statistics for a given match. 
+        /// Including player and team stats, scoring info, and channel availability.
+        /// See API docs: Sport Event Summary - https://developer.sportradar.com/soccer/reference/soccer-sport-event-summary
         /// </summary>
-        /// <param name="sportEventId"></param>
-        /// <returns></returns>
+        /// <param name="sportEventId">MatchId (Unique identifier of the sport event)</param>
+        /// <returns>Real-time match statistics for a given match.</returns>
         public async Task<SportEventSummaryResponse?> GetSportEventAsync(string sportEventId)
         {
             string endpoint = $"{_lang}/sport_events/{sportEventId}/summary.json";
@@ -58,10 +65,12 @@ namespace sportradar.Services.SportradarApiService
             return JsonConvert.DeserializeObject<SportEventSummaryResponse>(json);
         }
 
+
         /// <summary>
-        /// 
+        /// Provides a list of all available Soccer competitions.
+        /// See API docs: Competitions - https://developer.sportradar.com/soccer/reference/soccer-competitions
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of all available Soccer leagues.</returns>
         public async Task<CompetitionsResponse?> GetCompetitionsAsync()
         {
             string endpoint = $"{_lang}/competitions.json";
@@ -72,11 +81,14 @@ namespace sportradar.Services.SportradarApiService
             return JsonConvert.DeserializeObject<CompetitionsResponse>(json);
         }
 
+
         /// <summary>
-        /// 
+        /// Provides historical season information for a given competition.
+        /// Valid competition IDs can be found in the Competitions feed.
+        /// See API docs: Competition Seasons - https://developer.sportradar.com/soccer/reference/soccer-competition-seasons
         /// </summary>
-        /// <param name="competitionId"></param>
-        /// <returns></returns>
+        /// <param name="competitionId">League Id (Unique identifier of the competition).</param>
+        /// <returns>List of all season for a given league.</returns>
         public async Task<CompetitionSeasonsResponse?> GetCompetitionSeasonsAsync(string competitionId)
         {
             string endpoint = $"{_lang}/competitions/{competitionId}/seasons.json";
@@ -87,11 +99,13 @@ namespace sportradar.Services.SportradarApiService
             return JsonConvert.DeserializeObject<CompetitionSeasonsResponse>(json);
         }
 
+
         /// <summary>
-        /// 
+        /// Provides a list of teams participating for a given season.
+        /// See API docs: Season Competitors - https://developer.sportradar.com/soccer/reference/soccer-season-competitors
         /// </summary>
-        /// <param name="seasonId"></param>
-        /// <returns></returns>
+        /// <param name="seasonId">Unique identifier of the season.</param>
+        /// <returns>List of teams participating for a given season.</returns>
         public async Task<SeasonCompetitorsResponse?> GetSeasonCompetitorsAsync(string seasonId)
         {
             string endpoint = $"{_lang}/seasons/{seasonId}/competitors.json";
@@ -102,11 +116,14 @@ namespace sportradar.Services.SportradarApiService
             return JsonConvert.DeserializeObject<SeasonCompetitorsResponse>(json);
         }
 
+
         /// <summary>
-        /// 
+        /// Provides scheduling information for upcoming matches 
+        /// and statistics for the 30 most recent completed matches of a specified competitor.
+        /// See API docs: Competitor Summaries - https://developer.sportradar.com/soccer/reference/soccer-competitor-summaries
         /// </summary>
-        /// <param name="competitorId"></param>
-        /// <returns></returns>
+        /// <param name="competitorId">Team Id (Unique identifier of the competitor).</param>
+        /// <returns>A list of upcoming matches and the 30 most recent completed matches of the Team (competitor).</returns>
         public async Task<CompetitorSummariesResponse?> GetCompetitorSummariesAsync(string competitorId)
         {
             string endpoint = $"{_lang}/competitors/{competitorId}/summaries.json";

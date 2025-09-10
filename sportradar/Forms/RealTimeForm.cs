@@ -2,6 +2,7 @@
 using sportradar.Models;
 using sportradar.Models.Sportradar.Soccer;
 using sportradar.Services.SportradarApiService;
+using System.Configuration;
 
 namespace sportradar.Forms
 {
@@ -13,9 +14,12 @@ namespace sportradar.Forms
         public RealTimeForm()
         {
             InitializeComponent();
-            _apiService = new SportradarApiService("5JIL3VdZKbmRfijZPq9tQldl1pWaaL8jPkp2ltOM");
+
+            var apiKey = ConfigurationManager.AppSettings["SportradarApiKey"] ?? string.Empty;
+            _apiService = new SportradarApiService(apiKey);
         }
 
+        #region Form Events
         private async void btnSearch_Click(object sender, EventArgs e)
         {
             try
@@ -89,6 +93,44 @@ namespace sportradar.Forms
             }
         }
 
+        private async void liveStatsTimer_Tick(object sender, EventArgs e)
+        {
+            if (_currentSportEventSummary == null) return;
+
+            try
+            {
+                var resp = await _apiService.GetSportEventAsync(_currentSportEventSummary.SportEvent.Id);
+
+                if (resp == null) throw new Exception("Match not found!");
+
+                var updatedMatch = new Summary
+                {
+                    SportEvent = resp.SportEvent,
+                    SportEventStatus = resp.SportEventStatus,
+                    Statistics = resp.Statistics
+                };
+
+                if (updatedMatch != null)
+                {
+                    var match = BuildLiveMatch(updatedMatch);
+                    BindMatchData(match);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Refresh failed: {ex.Message}");
+            }
+        }
+
+        private void RealTimeForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            StopAutoRefresh();
+        }
+
+        #endregion Form Events
+
+
+        #region Common
         private Summary? FindMatchByTeams(LiveSummariesResponse resp, string home, string away)
         {
             foreach (var summary in resp.Summaries)
@@ -197,39 +239,7 @@ namespace sportradar.Forms
                 liveStatsTimer.Stop();
             }
         }
+        #endregion Common
 
-        private async void liveStatsTimer_Tick(object sender, EventArgs e)
-        {
-            if (_currentSportEventSummary == null) return;
-
-            try
-            {
-                var resp = await _apiService.GetSportEventAsync(_currentSportEventSummary.SportEvent.Id);
-
-                if (resp == null) throw new Exception("Match not found!");
-
-                var updatedMatch = new Summary
-                {
-                    SportEvent = resp.SportEvent,
-                    SportEventStatus = resp.SportEventStatus,
-                    Statistics = resp.Statistics
-                };
-
-                if (updatedMatch != null)
-                {
-                    var match = BuildLiveMatch(updatedMatch);
-                    BindMatchData(match);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Refresh failed: {ex.Message}");
-            }
-        }
-
-        private void RealTimeForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            StopAutoRefresh();
-        }
     }
 }
