@@ -36,6 +36,7 @@ namespace sportradar.Forms
                     return;
                 }
 
+                //Get List of currently live match
                 var resp = await _apiService.GetLiveSportEventsAsync();
 
                 if (resp == null || resp.Summaries.Count == 0)
@@ -54,6 +55,7 @@ namespace sportradar.Forms
 
                 var sportEventId = selectedSummary.SportEvent.Id;
 
+                //Get Real-time match statistics for a given match
                 var eventResponse = await _apiService.GetSportEventAsync(sportEventId);
 
                 if (eventResponse == null) return;
@@ -93,12 +95,18 @@ namespace sportradar.Forms
             }
         }
 
+        /// <summary>
+        /// Timer loop runs every interval (in seconds) set in liveStatsTimer.
+        /// Used to get real-time match data (auto refresh statistics).
+        /// To change refresh time -> adjust liveStatsTimer.Interval (milliseconds) in Form designer.
+        /// </summary>
         private async void liveStatsTimer_Tick(object sender, EventArgs e)
         {
             if (_currentSportEventSummary == null) return;
 
             try
             {
+                //Get Real-time match statistics for a given match
                 var resp = await _apiService.GetSportEventAsync(_currentSportEventSummary.SportEvent.Id);
 
                 if (resp == null) throw new Exception("Match not found!");
