@@ -30,7 +30,7 @@
         {
             tableLayoutPanel1 = new TableLayoutPanel();
             btnOpenHistoricalDataForm = new Button();
-            btnRealTimeForm = new Button();
+            btnLiveMatchesForm = new Button();
             btnQuit = new Button();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
@@ -41,7 +41,7 @@
             tableLayoutPanel1.ColumnCount = 1;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Controls.Add(btnOpenHistoricalDataForm, 0, 1);
-            tableLayoutPanel1.Controls.Add(btnRealTimeForm, 0, 0);
+            tableLayoutPanel1.Controls.Add(btnLiveMatchesForm, 0, 0);
             tableLayoutPanel1.Controls.Add(btnQuit, 0, 3);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
@@ -65,16 +65,16 @@
             btnOpenHistoricalDataForm.UseVisualStyleBackColor = true;
             btnOpenHistoricalDataForm.Click += btnOpenHistoricalDataForm_Click;
             // 
-            // btnRealTimeForm
+            // btnLiveMatchesForm
             // 
-            btnRealTimeForm.Anchor = AnchorStyles.None;
-            btnRealTimeForm.Location = new Point(83, 11);
-            btnRealTimeForm.Name = "btnRealTimeForm";
-            btnRealTimeForm.Size = new Size(170, 49);
-            btnRealTimeForm.TabIndex = 0;
-            btnRealTimeForm.Text = "Open Real Time Form";
-            btnRealTimeForm.UseVisualStyleBackColor = true;
-            btnRealTimeForm.Click += btnRealTimeForm_Click;
+            btnLiveMatchesForm.Anchor = AnchorStyles.None;
+            btnLiveMatchesForm.Location = new Point(83, 11);
+            btnLiveMatchesForm.Name = "btnLiveMatchesForm";
+            btnLiveMatchesForm.Size = new Size(170, 49);
+            btnLiveMatchesForm.TabIndex = 0;
+            btnLiveMatchesForm.Text = "Open Live Matches Form";
+            btnLiveMatchesForm.UseVisualStyleBackColor = true;
+            btnLiveMatchesForm.Click += btnLiveMatchesForm_Click;
             // 
             // btnQuit
             // 
@@ -102,7 +102,7 @@
         #endregion
 
         private TableLayoutPanel tableLayoutPanel1;
-        private Button btnRealTimeForm;
+        private Button btnLiveMatchesForm;
         private Button btnOpenHistoricalDataForm;
         private Button btnQuit;
     }

@@ -40,6 +40,7 @@ namespace sportradar.Services.SportradarApiService
         public async Task<LiveSummariesResponse?> GetLiveSportEventsAsync()
         {
             string endpoint = $"{_lang}/schedules/live/summaries.json";
+
             var response = await _httpClient.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
 

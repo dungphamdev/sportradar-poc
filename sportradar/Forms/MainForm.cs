@@ -2,8 +2,8 @@ namespace sportradar.Forms
 {
     public partial class MainForm : Form
     {
-        private RealTimeForm? realTimeForm;
-        private HistoricalDataForm? historicalDataForm;
+        private LiveMatchesForm? _liveMatchesForm;
+        private HistoricalDataForm? _historicalDataForm;
 
         public MainForm()
         {
@@ -24,14 +24,14 @@ namespace sportradar.Forms
             }
         }
 
-        private void btnRealTimeForm_Click(object sender, EventArgs e)
+        private void btnLiveMatchesForm_Click(object sender, EventArgs e)
         {
-            OpenForm(ref realTimeForm);
+            OpenForm(ref _liveMatchesForm);
         }
 
         private void btnOpenHistoricalDataForm_Click(object sender, EventArgs e)
         {
-            OpenForm(ref historicalDataForm);
+            OpenForm(ref _historicalDataForm);
         }
 
         private void btnQuit_Click(object sender, EventArgs e)

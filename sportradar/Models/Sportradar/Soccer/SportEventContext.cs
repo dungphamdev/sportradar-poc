@@ -7,8 +7,8 @@ namespace sportradar.Models.Sportradar.Soccer
         //[JsonProperty("sport")]
         //public Sport Sport { get; set; }
 
-        //[JsonProperty("category")]
-        //public Category Category { get; set; }
+        [JsonProperty("category")]
+        public Category Category { get; set; } = new();
 
         [JsonProperty("competition")]
         public Competition Competition { get; set; } = new();
