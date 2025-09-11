@@ -134,5 +134,41 @@ namespace sportradar.Services.SportradarApiService
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<CompetitorSummariesResponse>(json);
         }
+
+
+        /// <summary>
+        /// Soccer Extended Seasons provides a list of historical season information for all competitions. 
+        /// Competitions will return a maximum of three seasons of data, 
+        /// including current or newly created seasons.
+        /// See API docs: Seasons - https://developer.sportradar.com/soccer/reference/soccer-extended-seasons
+        /// </summary>
+        /// <returns>List of available Soccer seasons.</returns>
+        public async Task<SeasonsResponse?> GetSeasonsAsync()
+        {
+            string endpoint = $"{_lang}/seasons.json";
+            var response = await _httpClient.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+
+            string json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<SeasonsResponse>(json);
+        }
+
+
+        /// <summary>
+        /// Soccer Extended Season Summaries provides information for 
+        /// all matches from a given season including scoring and statistics at the match level.
+        /// See API docs: Season Summaries - https://developer.sportradar.com/soccer/reference/soccer-extended-season-summaries
+        /// </summary>
+        /// <param name="seasonId">Unique identifier of the season.</param>
+        /// <returns>List of match summaries with scores and statistics for the given season.</returns>
+        public async Task<SeasonSummariesResponse?> GetSeasonSummariesAsync(string seasonId, int start = 0, int limit = 100)
+        {
+            string endpoint = $"{_lang}/seasons/{seasonId}/summaries.json?start={start}&limit={limit}";
+            var response = await _httpClient.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+
+            string json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<SeasonSummariesResponse>(json);
+        }
     }
 }

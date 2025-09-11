@@ -236,6 +236,9 @@ namespace sportradar.Forms
         {
             if (_competitions == null) return;
 
+            combobox.DisplayMember = "Display";
+            combobox.ValueMember = "Id";
+
             combobox.DataSource = _competitions
                 .Select(c => new
                 {
@@ -243,8 +246,6 @@ namespace sportradar.Forms
                     Display = $"{c.Name} | {c.Category.Name} ({c.Gender})"
                 })
                 .ToList();
-            combobox.DisplayMember = "Display";
-            combobox.ValueMember = "Id";
         }
 
         #endregion Common

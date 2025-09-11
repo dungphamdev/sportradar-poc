@@ -3,7 +3,7 @@ namespace sportradar.Forms
     public partial class MainForm : Form
     {
         private LiveMatchesForm? _liveMatchesForm;
-        private HistoricalDataForm? _historicalDataForm;
+        private HistoricalData2Form? _historicalDataForm;
 
         public MainForm()
         {
