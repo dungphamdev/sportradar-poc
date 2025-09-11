@@ -216,7 +216,7 @@ namespace sportradar.Forms
             var data = season
                 .Where(m => m.SportEvent.Competitors.Any(c => c.Id == teamId))
                 .Select(BuildHistoricalMatch)
-                .OrderBy(x => x.MatchDate)
+                .OrderByDescending(x => x.MatchDate)
                 .ToList();
 
             BindMatchData(data, dtgvHistoricalData);
