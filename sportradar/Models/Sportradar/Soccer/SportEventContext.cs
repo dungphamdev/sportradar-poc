@@ -13,8 +13,8 @@ namespace sportradar.Models.Sportradar.Soccer
         [JsonProperty("competition")]
         public Competition Competition { get; set; } = new();
 
-        //[JsonProperty("season")]
-        //public Season Season { get; set; }
+        [JsonProperty("season")]
+        public Season Season { get; set; } = new();
 
         //[JsonProperty("stage")]
         //public Stage Stage { get; set; }

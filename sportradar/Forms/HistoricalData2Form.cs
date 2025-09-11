@@ -1,8 +1,11 @@
 ﻿using sportradar.Helpers;
 using sportradar.Models;
 using sportradar.Models.Sportradar.Soccer;
+using sportradar.Models.Sportradar.Soccer.CompetitionSeasonsResponse;
+using sportradar.Models.Sportradar.Soccer.SeasonCompetitorsResponse;
 using sportradar.Services.SportradarApiService;
 using System.Configuration;
+using System.Threading.Tasks;
 
 namespace sportradar.Forms
 {
@@ -10,7 +13,7 @@ namespace sportradar.Forms
     {
         private readonly SportradarApiService _apiService;
         private List<Models.Sportradar.Soccer.CompetitionsResponse.Competition>? _competitions;
-        private List<Season>? _seasons;
+        private List<Models.Sportradar.Soccer.Season>? _seasons;
         private List<Summary>? _currentSeasons;
 
         public HistoricalData2Form()
@@ -98,45 +101,45 @@ namespace sportradar.Forms
                     var seasonId = await GetSeasonIdByYearAndLeague(selectedYear, selectedLeagueId);
                     if (string.IsNullOrWhiteSpace(seasonId)) return;
 
-                    //Get all match for a given season
-                    _currentSeasons = [];
-                    int start = 0;
-                    int limit = 100; // max allowed by API
-                    while (true)
-                    {
-                        var seasonSummariesResp = await _apiService.GetSeasonSummariesAsync(seasonId, start, limit)
-                               ?? throw new Exception("Unexpected response from server.");
+                    ////Get all match for a given season
+                    //_currentSeasons = [];
+                    //int start = 0;
+                    //int limit = 100; // max allowed by API
+                    //while (true)
+                    //{
+                    //    var seasonSummariesResp = await _apiService.GetSeasonSummariesAsync(seasonId, start, limit)
+                    //           ?? throw new Exception("Unexpected response from server.");
 
-                        if (seasonSummariesResp.Summaries.Count == 0)
-                        {
-                            break;
-                        }
+                    //    if (seasonSummariesResp.Summaries.Count == 0)
+                    //    {
+                    //        break;
+                    //    }
 
-                        _currentSeasons.AddRange(seasonSummariesResp.Summaries);
+                    //    _currentSeasons.AddRange(seasonSummariesResp.Summaries);
 
-                        // next page
-                        start += limit;
+                    //    // next page
+                    //    start += limit;
 
-                        //Delay to prevent spamming
-                        await Task.Delay(500);
-                    }
+                    //    //Delay to prevent spamming
+                    //    await Task.Delay(500);
+                    //}
 
-                    _currentSeasons = _currentSeasons
-                        .Where(x => x.SportEvent.StartTime.Date < DateTime.UtcNow.Date)
-                        .ToList();
+                    //_currentSeasons = _currentSeasons
+                    //    .Where(x => x.SportEvent.StartTime.Date < DateTime.UtcNow.Date)
+                    //    .ToList();
 
-                    var lstTeam = _currentSeasons
-                        .SelectMany(m => m.SportEvent.Competitors)
-                        .DistinctBy(c => c.Id)
-                        .OrderBy(c => c.Name)
-                        .ToList();
+                    //var lstTeam = _currentSeasons
+                    //    .SelectMany(m => m.SportEvent.Competitors)
+                    //    .DistinctBy(c => c.Id)
+                    //    .OrderBy(c => c.Name)
+                    //    .ToList();
 
                     //Get all team for a given season
-                    //var seasonCompetitorsResp = await _apiService.GetSeasonCompetitorsAsync(seasonId)
-                    //       ?? throw new Exception("Unexpected response from server.");
+                    var seasonCompetitorsResp = await _apiService.GetSeasonCompetitorsAsync(seasonId)
+                           ?? throw new Exception("Unexpected response from server.");
 
-                    //var seasonCompetitors = seasonCompetitorsResp.SeasonCompetitors
-                    //    .OrderBy(x => x.Name).ToList();
+                    var lstTeam = seasonCompetitorsResp.SeasonCompetitors
+                        .OrderBy(x => x.Name).ToList();
 
                     BindComboboxTeamData(cbbTeam, lstTeam);
                 }
@@ -147,7 +150,7 @@ namespace sportradar.Forms
             }
         }
 
-        private void BindComboboxTeamData(ComboBox combobox, List<Competitor> seasonCompetitors)
+        private void BindComboboxTeamData(ComboBox combobox, List<SeasonCompetitor> seasonCompetitors)
         {
             if (seasonCompetitors == null) return;
 
@@ -182,30 +185,38 @@ namespace sportradar.Forms
             return result;
         }
 
-        private void LoadHistoricalAsync()
+        private async Task LoadHistoricalAsync()
         {
             if (cbbYear.SelectedValue == null
                 || cbbLeague.SelectedValue == null
-                || cbbTeam.SelectedValue == null
-                || _currentSeasons == null)
+                || cbbTeam.SelectedValue == null)
             {
                 MessageBox.Show("Please select Year, League and Team.");
                 return;
             }
 
+
+            int selectedYear = (int)cbbYear.SelectedValue;
+            var selectedLeagueId = cbbLeague.SelectedValue.ToString();
+
+            if (string.IsNullOrWhiteSpace(selectedLeagueId)) return;
+
+            //Get season from `selectedYear` and `selectedLeagueId`
+            var seasonId = await GetSeasonIdByYearAndLeague(selectedYear, selectedLeagueId);
+
+            if (string.IsNullOrWhiteSpace(seasonId)) return;
             var teamId = cbbTeam.SelectedValue.ToString();
+
+            await PrepareSeasonData(seasonId);
+
+            if (_currentSeasons == null) throw new Exception("Cannot get season data. Please try again");
+
             var season = _currentSeasons;
-            foreach (var match in season)
-            {
-                if (match.SportEvent.Competitors.Any(x => x.Id == teamId))
-                {
-                    BuildHistoricalMatch(match);
-                }
-            }
 
             var data = season
                 .Where(m => m.SportEvent.Competitors.Any(c => c.Id == teamId))
                 .Select(BuildHistoricalMatch)
+                .OrderBy(x => x.MatchDate)
                 .ToList();
 
             BindMatchData(data, dtgvHistoricalData);
@@ -227,7 +238,7 @@ namespace sportradar.Forms
 
             result.MatchDate = sportEventSummary.SportEvent.StartTime.Date;
             result.MatchName = $"{homeTeam} vs {awayTeam}";
-            result.LeagueName = leagueName;
+            result.SeasonName = _currentSeasons?.FirstOrDefault()?.SportEvent.SportEventContext.Season.Name ?? leagueName;
             result.FinalScore = $"{sportEventSummary.SportEventStatus.HomeScore} - {sportEventSummary.SportEventStatus.AwayScore}";
 
             var homeStats = sportEventSummary.Statistics.Totals.Competitors.FirstOrDefault(x => x.Qualifier == "home")?.Statistics;
@@ -305,6 +316,38 @@ namespace sportradar.Forms
             }
 
             return result;
+        }
+
+        private async Task PrepareSeasonData(string seasonId)
+        {
+            if (_currentSeasons?.FirstOrDefault()?.SportEvent.SportEventContext.Season.Id == seasonId) return;
+
+            //Get all match for a given season
+            _currentSeasons = [];
+            int start = 0;
+            int limit = 100; // max allowed by API
+            while (true)
+            {
+                var seasonSummariesResp = await _apiService.GetSeasonSummariesAsync(seasonId, start, limit)
+                       ?? throw new Exception("Unexpected response from server.");
+
+                if (seasonSummariesResp.Summaries.Count == 0)
+                {
+                    break;
+                }
+
+                _currentSeasons.AddRange(seasonSummariesResp.Summaries);
+
+                // next page
+                start += limit;
+
+                //Delay to prevent spamming
+                await Task.Delay(500);
+            }
+
+            _currentSeasons = _currentSeasons
+                .Where(x => x.SportEvent.StartTime.Date < DateTime.UtcNow.Date)
+                .ToList();
         }
 
         private void DisableFormAccess()
@@ -401,12 +444,12 @@ namespace sportradar.Forms
             }
         }
 
-        private void btnSearch_Click(object sender, EventArgs e)
+        private async void btnSearch_Click(object sender, EventArgs e)
         {
             try
             {
                 DisableFormAccess();
-                LoadHistoricalAsync();
+                await LoadHistoricalAsync();
             }
             catch (Exception ex)
             {

@@ -184,7 +184,7 @@ namespace sportradar.Forms
 
             result.MatchDate = sportEventSummary.SportEvent.StartTime.Date;
             result.MatchName = $"{homeTeam} vs {awayTeam}";
-            result.LeagueName = leagueName;
+            result.SeasonName = leagueName;
             result.FinalScore = $"{sportEventSummary.SportEventStatus.HomeScore} - {sportEventSummary.SportEventStatus.AwayScore}";
 
             var homeStats = sportEventSummary.Statistics.Totals.Competitors.FirstOrDefault(x => x.Qualifier == "home")?.Statistics;

@@ -5,7 +5,7 @@
         public DateTime MatchDate { get; set; }
         public string MatchName { get; set; } = string.Empty;
         public string FinalScore { get; set; } = string.Empty;
-        public string LeagueName { get; set; } = string.Empty;
+        public string SeasonName { get; set; } = string.Empty;
 
         // Extra stats
         public string PossessionGap { get; set; } = string.Empty;
